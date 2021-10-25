@@ -6,6 +6,7 @@ const server = express()
 // GLOBAL MIDDLEWARE/ VERY IMPORTANT!!
 server.use(express.json())
 // ENDPOINTS
+//start with edge cases and undesireable data
 
 // [GET] / (Hello World endpoint)
 //req(represents request from client)
@@ -42,10 +43,29 @@ server.get('/api/dogs/:id', async (req, res) => {
   })
 
 // [POST] /api/dogs (C of CRUD, create new dog from JSON payload)
+
+server.post('/api/dogs', async (req, res) => {
+    try {
+      // 1- gather info from client
+      const { name, weight } = req.body
+      // 2- assume stuff is bad, handle
+      if (!name || !weight) {
+        res.status(422).json({ message: 'Dogs need name & weight' })
+      } else {
+        // 3- hit the db and send the stuff
+        const dog = await Dog.create({ name, weight })
+        res.status(201).json(dog)
+      }
+    } catch (error) {
+      res.status(500).json({ message: `Argh!!! ${error.message}` })
+    }
+  })
 // [PUT] /api/dogs/:id (U of CRUD, update dog with :id using JSON payload)
 // [DELETE] /api/dogs/:id (D of CRUD, remove dog with :id)
 
 // EXPOSING THE SERVER TO OTHER MODULES
 module.exports = server
+
+
 
 //nodemon restarts the server whenever we make changes
